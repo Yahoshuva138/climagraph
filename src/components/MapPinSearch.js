@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const loadGoogleMapsScript = (apiKey) => {
   return new Promise((resolve, reject) => {
@@ -16,11 +16,16 @@ const MapPinSearch = ({ onSelect }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const markerRef = useRef(null);
+  const [mapError, setMapError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
-      console.warn("REACT_APP_GOOGLE_MAPS_API_KEY not set. Map will not load.");
+      const msg = "Google Maps API key not set (REACT_APP_GOOGLE_MAPS_API_KEY). Map unavailable.";
+      console.warn(msg);
+      setMapError(msg);
+      setLoading(false);
       return;
     }
 
@@ -52,8 +57,12 @@ const MapPinSearch = ({ onSelect }) => {
           });
         });
       })
+      .then(() => setLoading(false))
       .catch((err) => {
-        console.error("Failed to load Google Maps", err);
+        const msg = "Failed to load Google Maps script.";
+        console.error(msg, err);
+        setMapError(msg + (err && err.message ? ` ${err.message}` : ""));
+        setLoading(false);
       });
 
     return () => {
@@ -65,8 +74,21 @@ const MapPinSearch = ({ onSelect }) => {
   return (
     <div className="my-8">
       <h3 className="text-2xl font-semibold mb-2 text-gray-800 dark:text-white">Pin a Place on the Map</h3>
-      <div ref={mapRef} className="w-full max-w-xl h-80 rounded-lg shadow-sm" />
-      <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">Click the map to place a pin. The pinned place name will be returned.</p>
+      {mapError ? (
+        <div className="w-full max-w-xl h-80 rounded-lg shadow-sm flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 p-4">
+          <div>
+            <p className="font-medium">Map unavailable</p>
+            <p className="text-sm mt-1">{mapError}</p>
+            <p className="text-xs mt-2 text-gray-500">If you deployed to Vercel, add your Google Maps API key to the project env as REACT_APP_GOOGLE_MAPS_API_KEY and rebuild.</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div ref={mapRef} className="w-full max-w-xl h-80 rounded-lg shadow-sm" />
+          {loading && <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">Loading map…</p>}
+          {!loading && <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">Click the map to place a pin. The pinned place name will be returned.</p>}
+        </>
+      )}
     </div>
   );
 };
