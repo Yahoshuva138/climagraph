@@ -81,7 +81,7 @@ src/
 │   └── Footer.js       # Footer component
 ├── contexts/           # React Context providers
 │   ├── ThemeContext.js # Theme management
-│   └── WeatherContext.js # Weather data management
+   └── WeatherContext.js # Weather data management
 ├── pages/              # Application pages
 │   ├── Home.js         # Landing page
 │   ├── WeatherReport.js # Weather report page
