@@ -19,7 +19,15 @@ const GeminiAIAnalysis = () => {
     try {
       // Prepare a summary of the latest weather data for AI analysis
       const weatherSummary = `Analyze the following weather data for insights and recommendations.\nCity: ${weatherData.city}, Country: ${weatherData.country}, Temperature: ${weatherData.current.main.temp}°C, Humidity: ${weatherData.current.main.humidity}%, Weather: ${weatherData.current.weather[0].description}, Wind Speed: ${weatherData.current.wind.speed} m/s.`;
-  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyDMrToKPOPFyGGyR-HSMs21VuwuVxVXNwM", {
+      // Read the Gemini/Google API key from environment variable. In CRA this must be prefixed with REACT_APP_
+      const apiKey = process.env.REACT_APP_GEMINI_API_KEY;
+      if (!apiKey) {
+        setError("Missing Gemini API key. Please set REACT_APP_GEMINI_API_KEY in your .env file.");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
